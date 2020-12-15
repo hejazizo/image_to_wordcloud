@@ -1,0 +1,6 @@
+pytesseract
+arabic-reshaper
+python-bidi
+hazm
+Pillow
+wordcloud
