@@ -33,13 +33,10 @@ def separate_items(items):
 
     return items
 
-
+# input image
 image_path = Path("image.jpg")
 
 # Simple image to string
-# for lang='eng+fas' to work download persian language data and put it in tesseract-ocr data directory
-# for my local system it is: /usr/share/tesseract-ocr/4.00/tessdata/
-
 # Note: psm is a hyperparameter that can be tuned for better results
 txt = pytesseract.image_to_string(Image.open(image_path), config='--psm 3', lang='eng+fas')
 
