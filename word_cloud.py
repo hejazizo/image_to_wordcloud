@@ -18,7 +18,7 @@ from constants import STOP_WORDS
 #
 # -------------------------------------------------- #
 # read the input text
-with Path('./input.txt').open() as f:
+with Path('./output/tesseract.txt').open() as f:
     text = f.read()
 
 # tokenize it using hazm for persian words
@@ -27,7 +27,7 @@ tokens = [w for w in tokens if w not in STOP_WORDS]
 text = ' '.join(tokens)
 
 # we also dump most common words and their frequencies
-with open('./most_common_words.txt', 'w') as f:
+with open('./output/most_common_words.txt', 'w') as f:
     most_common = [f'{w[0]}: {w[1]}' for w in Counter(tokens).most_common(100)]
     f.write('\n'.join(most_common))
     print('most common words dumped.')
@@ -51,11 +51,11 @@ wordcloud = WordCloud(
 
     # uncomment this if you need a mask for your word cloud
     # mask=mask_image,
-    width=500, height=900,
+    width=600, height=900,
 
     # customize font for word cloud text
     font_path='data/fonts/NotoNaskhArabic/NotoNaskhArabic-Regular.ttf').generate(text)
 
 # export the image
-wordcloud.to_file("wordcloud.png")
+wordcloud.to_file("./output/wordcloud.png")
 print('word cloud exported.')

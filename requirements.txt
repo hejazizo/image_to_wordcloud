@@ -4,3 +4,4 @@ python-bidi
 hazm
 Pillow
 wordcloud
+tqdm
