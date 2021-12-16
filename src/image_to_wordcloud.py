@@ -15,6 +15,7 @@ from wordcloud import WordCloud
 
 from src.constants import FA_ALPHABETS
 from src.data import DATA_DIR
+import numpy as np
 
 
 class ImageToWordcloud:
@@ -27,25 +28,37 @@ class ImageToWordcloud:
         stop_words = map(str.strip, stop_words)
         self.stop_words = set(map(self.normalizer.normalize, stop_words))
 
-    def __call__(self, images_directory: Union[Path, str], output_dir: Union[Path, str]):
+    def __call__(
+        self,
+        images_directory: Union[Path, str], output_dir: Union[Path, str],
+        mask_image_path: Union[Path, str] = None,
+    ):
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         text = self.image_to_txt(images_directory)
         text = self.separate_items(text)
-        self.generate_word_cloud(text, output_dir)
+        text = self.de_emojify(text)
+        text = self.remove_stopwords(text)
+        self.generate_word_cloud(text, output_dir, mask_image_path)
 
     def generate_word_cloud(
         self,
         text: str,
         output_dir: Union[str, Path],
+        mask_image_path: Union[str, Path] = None,
         width: int = 800, height: int = 600,
         max_font_size: int = 250,
         background_color: str = 'white',
     ):
+        mask = None
+        if mask_image_path:
+            logger.info(f"Loading mask image from {mask_image_path}...")
+            mask = np.array(Image.open(DATA_DIR / 'mask.jpg'))
         wordcloud = WordCloud(
             width=width, height=height,
             font_path=str(DATA_DIR / 'Vazir.ttf'),
             background_color=background_color,
             max_font_size=max_font_size,
+            mask=mask,
         )
         text = arabic_reshaper.reshape(self.de_emojify(text))
         text = get_display(text)
@@ -115,6 +128,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--images_directory', type=str, default=DATA_DIR / 'images')
     parser.add_argument('--output_directory', type=str, default=DATA_DIR)
+    parser.add_argument('--mask_image_path', type=str, default=None)
     args = parser.parse_args()
     image_to_wordcloud = ImageToWordcloud()
-    image_to_wordcloud(args.images_directory, args.output_directory)
+    image_to_wordcloud(
+        args.images_directory,
+        args.output_directory,
+        args.mask_image_path
+    )
