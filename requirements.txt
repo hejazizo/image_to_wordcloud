@@ -1,7 +1,8 @@
-pytesseract
-arabic-reshaper
-python-bidi
-hazm
-Pillow
-wordcloud
-tqdm
+hazm==0.7.0
+wordcloud==1.8.1
+python-bidi==0.4.2
+arabic-reshaper==2.1.3
+loguru==0.5.3
+demoji==1.1.0
+Pillow==8.4.0
+pytesseract==0.3.8
