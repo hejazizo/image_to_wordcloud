@@ -13,5 +13,6 @@ export PYTHONPATH=${PWD}
 
 Then run:
 ```
-python src/stats.py --chat_json path_to_telegram_chat_export  --output_dir path_to_save_output_images --mask mask_image_path
+python src/image_to_wordcloud.py --images_directory src/data/images --output_directory src/data
 ```
+and wordcloud will be generated in `src/data/wordcloud.png` from the images in `src/data/images`.
