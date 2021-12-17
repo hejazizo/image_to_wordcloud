@@ -5,6 +5,7 @@ from typing import Union
 
 import arabic_reshaper
 import demoji
+import numpy as np
 import pytesseract
 from bidi.algorithm import get_display
 from hazm import Normalizer, word_tokenize
@@ -15,11 +16,14 @@ from wordcloud import WordCloud
 
 from src.constants import FA_ALPHABETS
 from src.data import DATA_DIR
-import numpy as np
 
 
 class ImageToWordcloud:
+    """
+    Converts a list of images to text and generates a word cloud.
+    """
     def __init__(self):
+        # persian words normalizer
         self.normalizer = Normalizer()
 
         # load stopwords
@@ -33,6 +37,13 @@ class ImageToWordcloud:
         images_directory: Union[Path, str], output_dir: Union[Path, str],
         mask_image_path: Union[Path, str] = None,
     ):
+        """
+        Converts a list of images to text and generates a word cloud.
+
+        :param images_directory: Directory containing images.
+        :param output_dir: Directory to save word cloud.
+        :param mask_image_path: Path to mask image.
+        """
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         text = self.image_to_txt(images_directory)
         text = self.separate_items(text)
@@ -49,10 +60,24 @@ class ImageToWordcloud:
         max_font_size: int = 250,
         background_color: str = 'white',
     ):
+        """
+        Generates a word cloud from the text.
+
+        :param text: Text to generate word cloud from.
+        :param output_dir: Directory to save word cloud.
+        :param mask_image_path: Path to mask image, defaults to None.
+        :param width: Width of the word cloud, defaults to 800.
+        :param height: Height of the word cloud, defaults to 600.
+        :param max_font_size: Maximum font size of the word cloud, defaults to 250.
+        :param background_color: Background color of the word cloud (white or black), defaults to 'white'.
+        """
         mask = None
         if mask_image_path:
             logger.info(f"Loading mask image from {mask_image_path}...")
             mask = np.array(Image.open(DATA_DIR / 'mask.jpg'))
+        else:
+            logger.warning("No mask image provided, word cloud will be generated without mask.")
+
         wordcloud = WordCloud(
             width=width, height=height,
             font_path=str(DATA_DIR / 'Vazir.ttf'),
@@ -66,12 +91,18 @@ class ImageToWordcloud:
         logger.info("Generating word cloud...")
         wordcloud.generate(text)
 
-        logger.info(f"Saving word cloud to {output_dir}")
         wordcloud.to_file(str(Path(output_dir) / 'word_cloud.png'))
+        logger.info(f"Saved word cloud to {output_dir}.")
 
     def image_to_txt(self, images_directory: Union[Path, str]):
+        """
+        Converts a list of images to text.
+
+        :param images_directory: Directory containing images.
+        """
+        logger.info("Converting images to text...")
         images_txt = []
-        for image_path in tqdm(list(Path(images_directory).iterdir()), desc='Converting images to text...'):
+        for image_path in tqdm(list(Path(images_directory).iterdir()), desc='Processing images...'):
             images_txt.append(pytesseract.image_to_string(Image.open(image_path), config='--psm 3', lang='eng+fas'))
 
         return ''.join(images_txt)
@@ -81,6 +112,7 @@ class ImageToWordcloud:
 
         :param text: Text that may contain stop-words.
         """
+        logger.info("Removing stop-words...")
         tokens = word_tokenize(self.normalizer.normalize(text))
         tokens = list(filter(lambda item: item not in self.stop_words, tokens))
         return ' '.join(tokens)
@@ -90,6 +122,7 @@ class ImageToWordcloud:
 
         :param text: Text that contains emoji
         """
+        logger.info("Removing emojis...")
         regrex_pattern = re.compile(pattern="[\u2069\u2066]+", flags=re.UNICODE)
         text = regrex_pattern.sub('', text)
         return demoji.replace(text, " ")
@@ -98,9 +131,11 @@ class ImageToWordcloud:
         """
         Receives a list of items, removes non persian lines,
         and concats consecutive lines to form a full response.
+        This is a workaround for pytesseract's inability to handle multiple lines.
 
-        This is a legacy function, should get refactored later.
+        Note: This is a legacy function, should get refactored later.
         """
+        logger.info('Post-processing pytesseract output...')
         items = []
         item = []
         end = False

@@ -131,3 +131,5 @@ dmypy.json
 # my custom gitignore
 .vscode/
 *.png
+*.jpg
+*.DS_Store
