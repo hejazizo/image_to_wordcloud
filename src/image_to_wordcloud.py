@@ -56,7 +56,8 @@ class ImageToWordcloud:
         text: str,
         output_dir: Union[str, Path],
         mask_image_path: Union[str, Path] = None,
-        width: int = 800, height: int = 600,
+        width: int = 600, height: int = 400,
+        scale: float = 1.0,
         max_font_size: int = 250,
         background_color: str = 'white',
     ):
